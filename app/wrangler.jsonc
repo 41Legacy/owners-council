@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Cloudflare deploy config for The Owners Council (Mike Laskowski's account).
+  // Higgsfield's own deploy ignores this file and generates its own.
+  "name": "owners-council",
+  "main": "dist/server/server.js",
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
+  "vars": { "HF_ENV": "production", "APP_SLUG": "owners-council" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "owners-council-db",
+      "database_id": "1b73f5ac-4aef-4f0e-a532-41824ef87fae",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

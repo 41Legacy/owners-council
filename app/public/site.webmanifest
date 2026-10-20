@@ -1,0 +1,8 @@
+{
+  "name": "The Owners Council",
+  "short_name": "Owners Council",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "display": "standalone",
+  "icons": [{ "src": "/assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
+}
