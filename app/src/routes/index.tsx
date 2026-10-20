@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { ScrollScrub } from "@/components/scroll-scrub/scroll-scrub";
 import { CopyIntro } from "@/components/site/copy-intro";
-import { ChapterInlineCta } from "@/components/site/ctas";
+import { ChapterInlineCta, InviteCta } from "@/components/site/ctas";
 import { ChapterForm, InvitationForm } from "@/components/site/forms";
+import { prefillAndScroll } from "@/components/site/prefill";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { scrollScrubScenes, scrollScrubTheme } from "@/scroll-scrub-scenes";
@@ -12,19 +13,33 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const pillars = [
+const facts = [
+  { label: "Who it is for", value: "Owner-operators of established companies, generally $1M to $25M in revenue" },
+  { label: "What it is", value: "A council of 10 to 12 owners per chapter, meeting in person" },
+  { label: "What it costs", value: "Nothing to buy and nothing to sign. Membership is by invitation" },
+  { label: "Who runs it", value: "Hosted by a trusted local advisor, designed and facilitated by 41 Legacy" },
+];
+
+const tracks = [
   {
-    name: "Education",
-    text: "Practical, plain-language sessions on what owners care about most: cash, people, growth, funding, and building something that lasts.",
+    name: "Market education",
+    text: "What buyers, lenders and investors look for, what businesses like yours are worth, and how the market is moving in your industry.",
   },
   {
-    name: "Community",
-    text: "Owners who sit in the same seat, sharing wins, lessons and encouragement in a room built on trust.",
+    name: "Growth strategy",
+    text: "Pricing, cash, people and systems: how to grow with less chaos and make the business easier to run.",
   },
   {
-    name: "Resources",
-    text: "A trusted network of specialists, programs and funding paths, ready whenever an owner wants an introduction.",
+    name: "Exit and succession planning",
+    text: "Your options, from selling to passing it on, the timing, and what makes a business transferable years before you need it to be.",
   },
+];
+
+const ownerSteps = [
+  { title: "Request an invitation", text: "Tell us about you, your business and the chapter you would like to join." },
+  { title: "A welcome call", text: "The chapter host calls to get to know you and answer your questions." },
+  { title: "Take your seat", text: "Join the next session with 10 to 12 fellow owners. Nothing to prepare." },
+  { title: "Learn and grow", text: "Sessions, workshops, expert guests and your private reports, all year." },
 ];
 
 const chapters = [
@@ -32,7 +47,7 @@ const chapters = [
     name: "Connecticut",
     state: "active" as const,
     status: "Founding chapter",
-    detail: "The first council table. Owner-operators across Connecticut, meeting in person.",
+    detail: "Owner-operators across Connecticut, meeting in person.",
   },
   {
     name: "Greater Boston",
@@ -41,36 +56,28 @@ const chapters = [
     detail:
       "Serving the Asian business-owner community of greater Boston. Designed and facilitated by 41 Legacy, hosted in partnership with PNC Private Bank.",
   },
-  {
-    name: "New York City and Westchester",
-    state: "forming" as const,
-    status: "Open for a host",
-    detail: "Seeking a founding advisor host.",
-  },
-  {
-    name: "Northern New Jersey",
-    state: "forming" as const,
-    status: "Open for a host",
-    detail: "Seeking a founding advisor host.",
-  },
-  {
-    name: "Rhode Island",
-    state: "forming" as const,
-    status: "Open for a host",
-    detail: "Seeking a founding advisor host.",
-  },
+  { name: "New York City and Westchester", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
+  { name: "Northern New Jersey", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
+  { name: "Rhode Island", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
   {
     name: "Central and Western Massachusetts",
     state: "forming" as const,
-    status: "Open for a host",
+    status: "Forming",
     detail: "Seeking a founding advisor host.",
   },
   {
     name: "New Hampshire, Vermont and Maine",
     state: "forming" as const,
-    status: "Open for a host",
+    status: "Forming",
     detail: "Seeking a founding advisor host.",
   },
+];
+
+const hostBenefits = [
+  "Give your best clients something valuable that no competitor offers",
+  "Become the advisor who brings owners together in your market",
+  "Meet the other owners in the room, who come to know and trust you",
+  "Nothing to sell, no fee-sharing, no supervision and no compliance exposure",
 ];
 
 const youBring = [
@@ -84,26 +91,53 @@ const weBring = [
   "Session design and facilitation, start to finish",
   "Private walk-away reports for every member",
   "The CEO workshop curriculum",
-  "Vetted guest speakers and the resource network",
+  "Vetted guest speakers and the professional network",
   "The ground rules, the chapter playbook and the follow-through",
 ];
 
-const steps = [
+const hostSteps = [
+  { title: "A first conversation", text: "We talk through your client base, your market and whether a chapter fits." },
+  { title: "Define the founding seat", text: "Together we write the profile of the owners the room is built for." },
+  { title: "A founding working lunch", text: "A few champions fill the seats and choose the first topics." },
+  { title: "The first council session", text: "We design and facilitate. You host. Owners leave with something useful." },
+];
+
+const faqs = [
   {
-    title: "A first conversation",
-    text: "We talk through your client base, your market and whether a chapter fits.",
+    q: "What exactly is The Owners Council?",
+    a: "A small, invite-only group of business owners in your area who meet in person to learn from experts and from each other: market education, growth strategy and exit planning, with private reports on your own business.",
   },
   {
-    title: "Define the founding seat",
-    text: "Together we write the profile of the owners the room is built for.",
+    q: "Does it cost anything?",
+    a: "There is nothing to buy and nothing to sign. Each chapter's host and partners cover the room and the coffee.",
   },
   {
-    title: "A founding working lunch",
-    text: "A few champions fill the seats and choose the first topics.",
+    q: "Is anyone going to sell me something?",
+    a: "No. It is a room for learning, not selling, and that rule covers the host, the guest speakers and 41 Legacy. One-on-one conversations happen only when an owner asks for one.",
   },
   {
-    title: "The first council session",
-    text: "We design and facilitate. You host. Owners leave with something useful.",
+    q: "How often does a chapter meet?",
+    a: "Chapters meet in person on a regular schedule set with each chapter's members, typically monthly, with CEO workshops and guest sessions through the year.",
+  },
+  {
+    q: "Who should join?",
+    a: "Owner-operators of established companies, generally $1M to $25M in annual revenue, who want to grow, reduce the chaos, and plan for what comes next.",
+  },
+  {
+    q: "How do I join an existing chapter?",
+    a: "Choose your chapter below and request an invitation. The chapter host will call you personally to welcome you and find you a seat.",
+  },
+  {
+    q: "There is no chapter near me yet. What now?",
+    a: "Request an invitation for the closest forming chapter. You will be among the first invited when it opens, and you may know an advisor who would like to host it.",
+  },
+  {
+    q: "I am an advisor. How do I host a chapter?",
+    a: "Tell us about your practice in the chapter form. We start with a conversation about your clients and your market. You host, and 41 Legacy designs and runs every session.",
+  },
+  {
+    q: "What is 41 Legacy's role?",
+    a: "41 Legacy designs and facilitates every council and is open about the advisory work it does outside of it. The council itself stands apart from that work.",
   },
 ];
 
@@ -114,25 +148,25 @@ function Index() {
       <main id="top">
         <ScrollScrub className="oc-journey" scenes={scrollScrubScenes} theme={scrollScrubTheme} />
 
-        <section aria-labelledby="thesis-title" className="oc-section" id="thesis">
+        <section aria-labelledby="what-title" className="oc-section" id="what">
           <div className="oc-wrap oc-thesis">
             <div className="oc-thesis__copy">
-              <h2 className="oc-h2" id="thesis-title">
-                Built on education and community.
+              <h2 className="oc-h2" id="what-title">
+                What is The Owners Council?
               </h2>
               <p className="oc-lede">
-                The council helps owners make the business easier to run, reduce the chaos, get out
-                of the day-to-day, and turn the business from a job into an asset. We do it by
-                learning together, three ways.
+                A peer council where business owners learn, plan and grow together. Members make the
+                business easier to run, reduce the chaos, get out of the day-to-day, and turn the
+                business from a job into an asset.
               </p>
-              <ul className="oc-pillars">
-                {pillars.map((pillar) => (
-                  <li key={pillar.name}>
-                    <h3>{pillar.name}</h3>
-                    <p>{pillar.text}</p>
-                  </li>
+              <dl className="oc-facts">
+                {facts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt>{fact.label}</dt>
+                    <dd>{fact.value}</dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
             </div>
             <figure className="oc-thesis__figure">
               <img
@@ -146,15 +180,75 @@ function Index() {
           </div>
         </section>
 
-        <section aria-labelledby="members-title" className="oc-section oc-section--tint" id="members">
+        <section aria-labelledby="paths-title" className="oc-section oc-section--tint" id="paths">
+          <div className="oc-wrap">
+            <h2 className="oc-h2" id="paths-title">
+              Two ways in.
+            </h2>
+            <div className="oc-paths">
+              <article className="oc-path oc-path--owner">
+                <p className="oc-path__who">I own a business</p>
+                <h3>Join a chapter.</h3>
+                <p>
+                  Take a seat with 10 to 12 fellow owners near you. Learn what drives value, plan your
+                  growth and your exit, and leave every session with something useful.
+                </p>
+                <ul>
+                  <li>Market education, strategy and exit planning</li>
+                  <li>Private reports on your own business</li>
+                  <li>CEO workshops and expert guest speakers</li>
+                  <li>Access to trusted professionals when you need them</li>
+                </ul>
+                <div className="oc-path__actions">
+                  <InviteCta />
+                  <a className="cta-text" href="#chapters">
+                    See the chapters
+                  </a>
+                </div>
+              </article>
+              <article className="oc-path oc-path--advisor">
+                <p className="oc-path__who">I advise business owners</p>
+                <h3>Host a chapter.</h3>
+                <p>
+                  CPAs, attorneys, bankers and advisors: bring the council to your clients. You host,
+                  41 Legacy designs and runs every session.
+                </p>
+                <ul>
+                  {hostBenefits.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+                <div className="oc-path__actions">
+                  <ChapterInlineCta />
+                  <a className="cta-text" href="#advisors">
+                    How hosting works
+                  </a>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="members-title" className="oc-section" id="members">
           <div className="oc-wrap">
             <h2 className="oc-h2" id="members-title">
               What members gain.
             </h2>
             <p className="oc-lede">
-              Membership is the learning, the insight and the people. Nothing to buy and nothing to
-              sign.
+              Three learning tracks run through every chapter, backed by reports, workshops, experts
+              and the people in the room.
             </p>
+            <ol className="oc-tracks">
+              {tracks.map((track, index) => (
+                <li key={track.name}>
+                  <span aria-hidden="true" className="oc-tracks__num">
+                    {index + 1}
+                  </span>
+                  <h3>{track.name}</h3>
+                  <p>{track.text}</p>
+                </li>
+              ))}
+            </ol>
             <div className="oc-bento">
               <article className="oc-bento__cell oc-bento__cell--report">
                 <img
@@ -165,11 +259,11 @@ function Index() {
                   width={1280}
                 />
                 <div className="oc-bento__copy">
-                  <h3>Private walk-away reports</h3>
+                  <h3>Private reports on your business</h3>
                   <p>
                     After key sessions each owner receives a confidential, plain-language read on
-                    where the business stands today and how much growth and change it is ready for
-                    next. Yours alone.
+                    where the business stands today, what it is worth to the market, and how much
+                    growth and change it is ready for next. Yours alone.
                   </p>
                 </div>
               </article>
@@ -183,9 +277,7 @@ function Index() {
                 />
                 <div className="oc-bento__copy">
                   <h3>CEO workshops</h3>
-                  <p>
-                    Hands-on working sessions built around what members want to learn next.
-                  </p>
+                  <p>Hands-on working sessions on the decisions members are facing right now.</p>
                 </div>
               </article>
               <article className="oc-bento__cell oc-bento__cell--speaker">
@@ -197,15 +289,15 @@ function Index() {
                   width={1280}
                 />
                 <div className="oc-bento__copy">
-                  <h3>Specialized guest speakers</h3>
-                  <p>Experts on funding, certifications, lending, succession and more, here to teach.</p>
+                  <h3>Expert guest speakers</h3>
+                  <p>Funding, lending, certifications, valuation, succession and more, here to teach.</p>
                 </div>
               </article>
               <article className="oc-bento__cell oc-bento__cell--resources">
-                <h3>A resource of resources</h3>
+                <h3>Access to trusted professionals</h3>
                 <p>
-                  When an owner needs a specialist, a grant path or a certification, the council
-                  knows who to call and makes the introduction.
+                  CPAs, attorneys, bankers, valuation and M&amp;A specialists, plus grant and funding
+                  programs. Vetted by the council and introduced only when you ask.
                 </p>
               </article>
               <article className="oc-bento__cell oc-bento__cell--peers">
@@ -216,6 +308,25 @@ function Index() {
                 </p>
               </article>
             </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="how-title" className="oc-section oc-section--tint" id="how">
+          <div className="oc-wrap">
+            <h2 className="oc-h2" id="how-title">
+              How joining works.
+            </h2>
+            <ol className="oc-steps">
+              {ownerSteps.map((step, index) => (
+                <li key={step.title}>
+                  <span aria-hidden="true" className="oc-steps__num">
+                    {index + 1}
+                  </span>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
 
@@ -238,11 +349,11 @@ function Index() {
           <div className="oc-wrap oc-chapters">
             <div className="oc-chapters__head">
               <h2 className="oc-h2" id="chapters-title">
-                Chapters across New England and the tri-state area.
+                Find your chapter.
               </h2>
               <p className="oc-lede">
-                Every chapter runs on the same design, the same ground rules and the same standard of
-                facilitation. What changes is the room.
+                Join an active chapter, get on the list for one that is forming, or host one for your
+                clients. Every chapter runs on the same design and the same ground rules.
               </p>
               <figure className="oc-chapters__figure">
                 <img
@@ -257,11 +368,31 @@ function Index() {
             <ul className="oc-chapter-list">
               {chapters.map((chapter) => (
                 <li className="oc-chapter" data-state={chapter.state} key={chapter.name}>
-                  <div>
-                    <h3>{chapter.name}</h3>
+                  <div className="oc-chapter__body">
+                    <div className="oc-chapter__top">
+                      <h3>{chapter.name}</h3>
+                      <span className="oc-chapter__status">{chapter.status}</span>
+                    </div>
                     <p>{chapter.detail}</p>
+                    <div className="oc-chapter__actions">
+                      <button
+                        className="cta-join"
+                        onClick={() => prefillAndScroll("owner", chapter.name)}
+                        type="button"
+                      >
+                        {chapter.state === "active" ? "Join this chapter" : "Join the waitlist"}
+                      </button>
+                      {chapter.state === "forming" ? (
+                        <button
+                          className="cta-host"
+                          onClick={() => prefillAndScroll("advisor", chapter.name)}
+                          type="button"
+                        >
+                          Host this chapter
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
-                  <span className="oc-chapter__status">{chapter.status}</span>
                 </li>
               ))}
             </ul>
@@ -272,7 +403,7 @@ function Index() {
           <div className="oc-wrap">
             <p className="oc-eyebrow">For CPAs, attorneys, bankers and advisors</p>
             <h2 className="oc-h2" id="advisors-title">
-              Bring the council to your clients.
+              Host a chapter for your clients.
             </h2>
             <p className="oc-lede">
               You already have the relationships. A chapter gives your clients a place to learn and
@@ -300,7 +431,7 @@ function Index() {
             </div>
 
             <ol className="oc-steps">
-              {steps.map((step, index) => (
+              {hostSteps.map((step, index) => (
                 <li key={step.title}>
                   <span aria-hidden="true" className="oc-steps__num">
                     {index + 1}
@@ -336,7 +467,7 @@ function Index() {
                 />
               </figure>
               <div>
-                <h3 className="oc-h3">Start a chapter with Mike.</h3>
+                <h3 className="oc-h3">Host a chapter with Mike.</h3>
                 <p className="oc-form-intro">
                   Tell us about your practice and the owners you serve. The first step is a
                   conversation, not a contract.
@@ -347,7 +478,23 @@ function Index() {
           </div>
         </section>
 
-        <section aria-labelledby="invitation-title" className="oc-section" id="invitation">
+        <section aria-labelledby="faq-title" className="oc-section" id="faq">
+          <div className="oc-wrap oc-faq">
+            <h2 className="oc-h2" id="faq-title">
+              Questions owners and advisors ask.
+            </h2>
+            <div className="oc-faq__list">
+              {faqs.map((item) => (
+                <details className="oc-faq__item" key={item.q}>
+                  <summary>{item.q}</summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="invitation-title" className="oc-section oc-section--tint" id="invitation">
           <div className="oc-wrap oc-invite">
             <div className="oc-invite__copy">
               <h2 className="oc-h2" id="invitation-title">
@@ -358,8 +505,8 @@ function Index() {
                 established companies, generally $1M to $25M in annual revenue.
               </p>
               <p className="oc-invite__note">
-                Tell us a little about you and your business. We would love to meet you, and the
-                chapter host will be in touch personally.
+                Choose the chapter you would like to join, or the closest forming chapter. The chapter
+                host will call you personally to welcome you.
               </p>
             </div>
             <InvitationForm />

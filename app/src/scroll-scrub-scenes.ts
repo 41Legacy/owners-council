@@ -6,7 +6,7 @@
 import { createElement } from "react";
 
 import type { ScrollScrubScene, ScrollScrubTheme } from "@/components/scroll-scrub/scroll-scrub";
-import { ChapterCta, InviteCta } from "@/components/site/ctas";
+import { ChapterCta, FindChapterCta, InviteCta } from "@/components/site/ctas";
 
 export const SITE_THEME_COLOR = "#111111";
 
@@ -27,13 +27,14 @@ const openingActions = createElement(
 const closingActions = createElement(
   "div",
   { className: "oc-hero-actions" },
+  createElement(FindChapterCta),
   createElement(ChapterCta),
 );
 
 export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     actions: openingActions,
-    body: "A welcoming circle of business owners who meet to learn, share what works, and build stronger companies side by side.",
+    body: "Owners of established companies meet in small local chapters to learn growth strategy, market trends and exit planning, from experts and from each other.",
     clip: "/assets/world/scene-01.mp4",
     id: "the-seat",
     kicker: "The Owners Council",
@@ -42,41 +43,41 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
     mobilePoster: "/assets/world/scene-01-mobile-poster.png",
     poster: "/assets/world/scene-01-poster.png",
     scroll: 1.3,
-    title: "Where owners learn and grow together.",
+    title: "A peer council for business owners.",
   },
   {
     align: "right",
-    body: "Ten to twelve owners per chapter, meeting in person. Real conversations, practical learning, and no sales pitches.",
+    body: "Ten to twelve owners per chapter, meeting in person, hosted by a trusted local advisor. Nothing to buy, and nothing is sold in the room.",
     clip: "/assets/world/scene-02.mp4",
     id: "the-room",
     label: "The table",
     mobileClip: "/assets/world/scene-02-mobile.mp4",
     mobilePoster: "/assets/world/scene-02-mobile-poster.png",
     poster: "/assets/world/scene-02-poster.png",
-    tags: ["Invite only", "Peer community"],
-    title: "A seat at the table for you.",
+    tags: ["Invite only", "Nothing to buy"],
+    title: "Small rooms. Real conversations.",
   },
   {
-    body: "Members leave with fresh ideas and private, plain-language reports on what their business can take on next.",
+    body: "Market education, strategy and exit planning, plus private reports on your business, CEO workshops and expert guest speakers.",
     clip: "/assets/world/scene-03.mp4",
     id: "the-clarity",
     label: "The learning",
     mobileClip: "/assets/world/scene-03-mobile.mp4",
     mobilePoster: "/assets/world/scene-03-mobile-poster.png",
     poster: "/assets/world/scene-03-poster.png",
-    tags: ["Private reports", "CEO workshops"],
-    title: "Learning you can use on Monday.",
+    tags: ["Private reports", "CEO workshops", "Guest experts"],
+    title: "Leave every session with something useful.",
   },
   {
     actions: closingActions,
     align: "right",
-    body: "Chapters across the tri-state area and New England, each hosted with a trusted local advisor.",
+    body: "Active in Connecticut and Greater Boston, with new chapters forming across New England and the tri-state area.",
     clip: "/assets/world/scene-04.mp4",
     id: "the-chapters",
     label: "The chapters",
     mobileClip: "/assets/world/scene-04-mobile.mp4",
     mobilePoster: "/assets/world/scene-04-mobile-poster.png",
     poster: "/assets/world/scene-04-poster.png",
-    title: "Growing across New England.",
+    title: "Join a chapter near you, or host one.",
   },
 ];

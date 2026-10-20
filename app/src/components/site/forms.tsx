@@ -1,4 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+
+import { PREFILL_EVENT, type PrefillDetail, type PrefillTarget } from "./prefill";
 
 import { submitChapterInquiry, submitInvitation } from "@/lib/api/council.functions";
 
@@ -12,7 +14,7 @@ export const REGIONS = [
   "Northern New Jersey",
   "Rhode Island",
   "Central and Western Massachusetts",
-  "New Hampshire, Vermont or Maine",
+  "New Hampshire, Vermont and Maine",
   "Somewhere else",
 ];
 
@@ -70,11 +72,33 @@ function Field({
   );
 }
 
-function Select({ id, label, options }: { id: string; label: string; options: string[] }) {
+function Select({
+  id,
+  label,
+  options,
+  prefillTarget,
+}: {
+  id: string;
+  label: string;
+  options: string[];
+  prefillTarget?: PrefillTarget;
+}) {
+  const ref = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    if (!prefillTarget) return;
+    const onPrefill = (event: Event) => {
+      const detail = (event as CustomEvent<PrefillDetail>).detail;
+      if (detail?.target !== prefillTarget || !ref.current) return;
+      const match = options.find((o) => o === detail.region) ?? options.find((o) => detail.region.startsWith(o.split(",")[0] ?? o));
+      if (match) ref.current.value = match;
+    };
+    window.addEventListener(PREFILL_EVENT, onPrefill);
+    return () => window.removeEventListener(PREFILL_EVENT, onPrefill);
+  }, [options, prefillTarget]);
   return (
     <div className="oc-field">
       <label htmlFor={id}>{label}</label>
-      <select defaultValue="" id={id} name={id} required>
+      <select defaultValue="" id={id} name={id} ref={ref} required>
         <option disabled value="">
           Choose one
         </option>
@@ -147,7 +171,7 @@ export function InvitationForm() {
         <Field autoComplete="organization" id="company" label="Company" required />
         <Field autoComplete="email" id="email" label="Email" required type="email" />
         <Field autoComplete="tel" id="phone" label="Phone" type="tel" />
-        <Select id="region" label="Nearest chapter area" options={REGIONS} />
+        <Select id="region" label="Chapter you would like to join" options={REGIONS} prefillTarget="owner" />
         <Select id="revenue" label="Annual revenue" options={REVENUE} />
         <Field id="referredBy" label="Who referred you" />
         <Area
@@ -212,7 +236,7 @@ export function ChapterForm() {
         <Select id="role" label="Your practice" options={ROLES} />
         <Field autoComplete="email" id="cemail" label="Email" required type="email" />
         <Field autoComplete="tel" id="cphone" label="Phone" type="tel" />
-        <Select id="cregion" label="Where would your chapter meet" options={REGIONS} />
+        <Select id="cregion" label="Where would your chapter meet" options={REGIONS} prefillTarget="advisor" />
         <Area
           hint="Who do you serve, and roughly how many owners would you be glad to introduce?"
           id="clients"

@@ -14,7 +14,15 @@ export function InviteCta() {
 export function ChapterCta() {
   return (
     <a className="cta-chapter" href="#advisors">
-      Start a chapter
+      Host a chapter
+    </a>
+  );
+}
+
+export function FindChapterCta() {
+  return (
+    <a className="cta-find" href="#chapters">
+      Find a chapter <span aria-hidden="true">↓</span>
     </a>
   );
 }
@@ -30,7 +38,7 @@ export function NavInviteCta() {
 export function ChapterInlineCta() {
   return (
     <a className="cta-chapter-inline" href="#chapter-form">
-      Start a chapter <span aria-hidden="true">↓</span>
+      Host a chapter <span aria-hidden="true">↓</span>
     </a>
   );
 }

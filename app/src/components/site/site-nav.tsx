@@ -1,10 +1,11 @@
 import { NavInviteCta } from "./ctas";
 
 const links = [
-  { href: "#thesis", label: "The thesis" },
-  { href: "#members", label: "Membership" },
+  { href: "#what", label: "What it is" },
+  { href: "#members", label: "Benefits" },
   { href: "#chapters", label: "Chapters" },
-  { href: "#advisors", label: "For advisors" },
+  { href: "#advisors", label: "Host a chapter" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 export function SiteNav() {

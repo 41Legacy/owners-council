@@ -1,18 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CustomTemplate } from "@/layouts/custom";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-interface AppSearch {
-  preview: boolean;
-}
-
+// The Higgsfield template's app shell is not part of this site; send visitors home.
 export const Route = createFileRoute("/app")({
-  validateSearch: (search: Record<string, unknown>): AppSearch => ({
-    preview: search.preview === "1" || search.preview === true,
-  }),
-  component: AppRoute,
+  beforeLoad: () => {
+    throw redirect({ to: "/" });
+  },
 });
-
-function AppRoute() {
-  const { preview } = Route.useSearch();
-  return <CustomTemplate previewMode={preview} />;
-}

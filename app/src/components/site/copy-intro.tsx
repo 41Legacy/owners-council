@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 export const REFERRAL_INTRO =
-  "I'm connected to a small, invite-only council of business owners here, built around learning and community. Members get CEO workshops, expert guest speakers, private plain-language reports on their business, and a great group of fellow owners. It is a room for learning, not selling. I thought of you. Want an introduction? theownerscouncil.com";
+  "I'm connected to a small, invite-only council of business owners here, built around learning and community. Members learn market trends, growth strategy and exit planning, with CEO workshops, expert guest speakers, private reports on their business, and access to trusted professionals. It is a room for learning, not selling. I thought of you. Want an introduction? theownerscouncil.com";
 
 export function CopyIntro() {
   const [copied, setCopied] = useState(false);

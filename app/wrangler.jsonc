@@ -3,6 +3,8 @@
   // Cloudflare deploy config for The Owners Council (Mike Laskowski's account).
   // Higgsfield's own deploy ignores this file and generates its own.
   "name": "owners-council",
+  // Keep variables set in the Cloudflare dashboard when deploying from GitHub.
+  "keep_vars": true,
   "main": "dist/server/server.js",
   "compatibility_date": "2025-05-01",
   "compatibility_flags": ["nodejs_compat"],
