@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { CONSENT_CALLS_TEXTS, CONSENT_EMAIL } from "@/lib/consent";
+
 import { PREFILL_EVENT, type PrefillDetail, type PrefillTarget } from "./prefill";
 
 import { submitChapterInquiry, submitInvitation } from "@/lib/api/council.functions";
@@ -127,12 +129,45 @@ function Area({ id, label, hint }: { id: string; label: string; hint: string }) 
   );
 }
 
+function Consent({ prefix, smsError }: { prefix: string; smsError: boolean }) {
+  return (
+    <fieldset className="oc-consent">
+      <legend>How we may contact you</legend>
+      <label className="oc-consent__row" htmlFor={`${prefix}-consent-sms`}>
+        <input id={`${prefix}-consent-sms`} name={`${prefix}ConsentSms`} type="checkbox" value="yes" />
+        <span>{CONSENT_CALLS_TEXTS}</span>
+      </label>
+      {smsError ? (
+        <p className="oc-form__error" role="alert">
+          Add a phone number above so we can call or text you, or leave this box unchecked.
+        </p>
+      ) : null}
+      <label className="oc-consent__row" htmlFor={`${prefix}-consent-email`}>
+        <input id={`${prefix}-consent-email`} name={`${prefix}ConsentEmail`} type="checkbox" value="yes" />
+        <span>{CONSENT_EMAIL}</span>
+      </label>
+      <p className="oc-consent__notice">
+        By submitting, you agree to our <a href="/terms">Terms of Service</a> and{" "}
+        <a href="/privacy">Privacy Policy</a>, and that we may contact you by email or phone to
+        respond to this request. Text messages follow our <a href="/sms-terms">SMS Terms</a>.
+      </p>
+    </fieldset>
+  );
+}
+
 export function InvitationForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [smsError, setSmsError] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const v = readForm(event.currentTarget);
+    const consentSms = v.ownerConsentSms === "yes";
+    if (consentSms && !(v.phone ?? "").trim()) {
+      setSmsError(true);
+      return;
+    }
+    setSmsError(false);
     setStatus("sending");
     try {
       await submitInvitation({
@@ -146,6 +181,8 @@ export function InvitationForm() {
           referredBy: v.referredBy ?? "",
           note: v.note ?? "",
           website: v.website ?? "",
+          consentSms,
+          consentEmail: v.ownerConsentEmail === "yes",
         },
       });
       setStatus("sent");
@@ -180,6 +217,7 @@ export function InvitationForm() {
           label="What's on your mind"
         />
       </div>
+      <Consent prefix="owner" smsError={smsError} />
       {status === "error" ? (
         <p className="oc-form__error" role="alert">
           That did not go through. Check the fields above and try again.
@@ -194,10 +232,17 @@ export function InvitationForm() {
 
 export function ChapterForm() {
   const [status, setStatus] = useState<Status>("idle");
+  const [smsError, setSmsError] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const v = readForm(event.currentTarget);
+    const consentSms = v.advisorConsentSms === "yes";
+    if (consentSms && !(v.cphone ?? "").trim()) {
+      setSmsError(true);
+      return;
+    }
+    setSmsError(false);
     setStatus("sending");
     try {
       await submitChapterInquiry({
@@ -210,6 +255,8 @@ export function ChapterForm() {
           region: v.cregion ?? "",
           clients: v.clients ?? "",
           website: v.website ?? "",
+          consentSms,
+          consentEmail: v.advisorConsentEmail === "yes",
         },
       });
       setStatus("sent");
@@ -243,6 +290,7 @@ export function ChapterForm() {
           label="Your client base"
         />
       </div>
+      <Consent prefix="advisor" smsError={smsError} />
       {status === "error" ? (
         <p className="oc-form__error" role="alert">
           That did not go through. Check the fields above and try again.

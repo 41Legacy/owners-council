@@ -21,6 +21,12 @@ export function SiteFooter() {
           licensed advisors. Hosting partners appear with their permission and do not endorse any
           individual service.
         </p>
+        <nav aria-label="Legal" className="oc-footer__links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms of Service</a>
+          <a href="/sms-terms">SMS Terms</a>
+          <a href="mailto:Mike@41Legacy.com">Contact</a>
+        </nav>
         <p>© 2026 41 Legacy LLC. All rights reserved.</p>
       </div>
     </footer>

@@ -1,8 +1,56 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import { bindings } from "../bindings.server";
+import { CONSENT_CALLS_TEXTS, CONSENT_EMAIL, CONSENT_VERSION, SUBMIT_NOTICE } from "../consent";
 import { GHL, pushLeadToGhl } from "../ghl.server";
+
+type ConsentRecord = {
+  sms: boolean;
+  email: boolean;
+  version: string;
+  at: string;
+  ip: string;
+  userAgent: string;
+  wording: string;
+};
+
+function consentRecord(sms: boolean, email: boolean): ConsentRecord {
+  const parts = [`Shown to submitter: "${SUBMIT_NOTICE}"`];
+  if (sms) parts.push(`Calls and texts (checked): "${CONSENT_CALLS_TEXTS}"`);
+  else parts.push("Calls and texts: not checked");
+  if (email) parts.push(`Email updates (checked): "${CONSENT_EMAIL}"`);
+  else parts.push("Email updates: not checked");
+  return {
+    sms,
+    email,
+    version: CONSENT_VERSION,
+    at: new Date().toISOString(),
+    ip: getRequestHeader("cf-connecting-ip") ?? "",
+    userAgent: (getRequestHeader("user-agent") ?? "").slice(0, 300),
+    wording: parts.join(" | "),
+  };
+}
+
+function consentTags(c: ConsentRecord): string[] {
+  return [
+    c.sms ? "consent: calls and texts" : "no consent: calls and texts",
+    c.email ? "consent: email updates" : "no consent: email updates",
+  ];
+}
+
+function consentNote(c: ConsentRecord): string {
+  return [
+    "",
+    "Contact consent",
+    `Calls and texts: ${c.sms ? "YES" : "NO"}`,
+    `Email updates: ${c.email ? "YES" : "NO"}`,
+    `Recorded: ${c.at} (consent version ${c.version})`,
+    `IP: ${c.ip || "unknown"}`,
+    `Wording: ${c.wording}`,
+  ].join("\n");
+}
 
 const field = (max: number) => z.string().trim().max(max);
 
@@ -16,6 +64,8 @@ const invitationInput = z.object({
   referredBy: field(160),
   note: field(2000),
   website: z.string().max(200),
+  consentSms: z.boolean(),
+  consentEmail: z.boolean(),
 });
 
 const chapterInput = z.object({
@@ -27,6 +77,8 @@ const chapterInput = z.object({
   region: field(80).min(1),
   clients: field(2000),
   website: z.string().max(200),
+  consentSms: z.boolean(),
+  consentEmail: z.boolean(),
 });
 
 async function forward(url: string | undefined, payload: Record<string, unknown>) {
@@ -48,12 +100,13 @@ export const submitInvitation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (data.website) return { ok: true };
     const { DB, LEAD_WEBHOOK_URL, GHL_PRIVATE_TOKEN } = bindings();
+    const consent = consentRecord(data.consentSms, data.consentEmail);
     let stored = false;
     if (DB) {
       await DB.prepare(
-        "INSERT INTO invitation_requests (name, company, email, phone, region, revenue, referred_by, note) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+        "INSERT INTO invitation_requests (name, company, email, phone, region, revenue, referred_by, note, consent_sms, consent_email, consent_version, consent_at, consent_ip, consent_user_agent, consent_wording) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
       )
-        .bind(data.name, data.company, data.email, data.phone, data.region, data.revenue, data.referredBy, data.note)
+        .bind(data.name, data.company, data.email, data.phone, data.region, data.revenue, data.referredBy, data.note, consent.sms ? 1 : 0, consent.email ? 1 : 0, consent.version, consent.at, consent.ip, consent.userAgent, consent.wording)
         .run();
       stored = true;
     }
@@ -68,6 +121,9 @@ export const submitInvitation = createServerFn({ method: "POST" })
       revenue: data.revenue,
       referred_by: data.referredBy,
       note: data.note,
+      consent_calls_texts: consent.sms,
+      consent_email: consent.email,
+      consent_version: consent.version,
       submitted_at: new Date().toISOString(),
     });
     const inGhl = await pushLeadToGhl(GHL_PRIVATE_TOKEN, {
@@ -75,7 +131,7 @@ export const submitInvitation = createServerFn({ method: "POST" })
       email: data.email,
       phone: data.phone,
       company: data.company,
-      tags: ["owners council", "oc owner request", `oc region: ${data.region}`],
+      tags: ["owners council", "oc owner request", `oc region: ${data.region}`, ...consentTags(consent)],
       stageId: GHL.stageOwnerRequested,
       opportunityName: `${data.company}: Owners Council invitation`,
       note: [
@@ -85,7 +141,7 @@ export const submitInvitation = createServerFn({ method: "POST" })
         `Annual revenue: ${data.revenue}`,
         `Referred by: ${data.referredBy || "not given"}`,
         `On their mind: ${data.note || "not given"}`,
-      ].join("\n"),
+      ].join("\n") + consentNote(consent),
     });
     if (!stored && !forwarded && !inGhl) throw new Error("Submissions are not configured yet");
     return { ok: true };
@@ -96,12 +152,13 @@ export const submitChapterInquiry = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     if (data.website) return { ok: true };
     const { DB, LEAD_WEBHOOK_URL, GHL_PRIVATE_TOKEN } = bindings();
+    const consent = consentRecord(data.consentSms, data.consentEmail);
     let stored = false;
     if (DB) {
       await DB.prepare(
-        "INSERT INTO chapter_inquiries (name, firm, role, email, phone, region, clients) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        "INSERT INTO chapter_inquiries (name, firm, role, email, phone, region, clients, consent_sms, consent_email, consent_version, consent_at, consent_ip, consent_user_agent, consent_wording) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
       )
-        .bind(data.name, data.firm, data.role, data.email, data.phone, data.region, data.clients)
+        .bind(data.name, data.firm, data.role, data.email, data.phone, data.region, data.clients, consent.sms ? 1 : 0, consent.email ? 1 : 0, consent.version, consent.at, consent.ip, consent.userAgent, consent.wording)
         .run();
       stored = true;
     }
@@ -115,6 +172,9 @@ export const submitChapterInquiry = createServerFn({ method: "POST" })
       phone: data.phone,
       region: data.region,
       clients: data.clients,
+      consent_calls_texts: consent.sms,
+      consent_email: consent.email,
+      consent_version: consent.version,
       submitted_at: new Date().toISOString(),
     });
     const inGhl = await pushLeadToGhl(GHL_PRIVATE_TOKEN, {
@@ -122,7 +182,7 @@ export const submitChapterInquiry = createServerFn({ method: "POST" })
       email: data.email,
       phone: data.phone,
       company: data.firm,
-      tags: ["owners council", "oc coi chapter lead", `oc region: ${data.region}`],
+      tags: ["owners council", "oc coi chapter lead", `oc region: ${data.region}`, ...consentTags(consent)],
       stageId: GHL.stageCoiInquiry,
       opportunityName: `${data.firm}: chapter host (${data.region})`,
       note: [
@@ -131,7 +191,7 @@ export const submitChapterInquiry = createServerFn({ method: "POST" })
         `Practice: ${data.role}`,
         `Proposed chapter area: ${data.region}`,
         `Client base: ${data.clients || "not given"}`,
-      ].join("\n"),
+      ].join("\n") + consentNote(consent),
     });
     if (!stored && !forwarded && !inGhl) throw new Error("Submissions are not configured yet");
     return { ok: true };
