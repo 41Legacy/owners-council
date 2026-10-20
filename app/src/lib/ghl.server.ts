@@ -5,9 +5,16 @@ const GHL_API = "https://services.leadconnectorhq.com";
 
 export const GHL = {
   locationId: "owURdzvQYMBBw1c6hlyZ",
-  pipelineId: "eX0GUrmlOxmfATZ8DCts",
-  stageOwnerRequested: "fad4bbaf-d47a-4905-a5c2-25590e73b851",
-  stageCoiInquiry: "ca8332da-504f-4101-8119-314df17b193d",
+  owners: {
+    pipelineId: "eX0GUrmlOxmfATZ8DCts", // Owners Council: Business Owners
+    stageRequested: "fad4bbaf-d47a-4905-a5c2-25590e73b851", // Invitation requested
+    stageWaitlist: "0ec1f91f-328b-4549-8924-ec115f785ff6", // Waitlist (forming chapter)
+  },
+  hosts: {
+    pipelineId: "CtCglew3cIVqQhPlUA1Q", // Owners Council: Chapter Hosts (Advisors)
+    stageInquiry: "f4e1b9f3-1f7e-4d87-90c9-a2bc27769d1a", // Host inquiry
+  },
+  activeChapters: ["Connecticut", "Greater Boston"],
 };
 
 type Lead = {
@@ -17,6 +24,7 @@ type Lead = {
   company: string;
   tags: string[];
   note: string;
+  pipelineId: string;
   stageId: string;
   opportunityName: string;
 };
@@ -79,7 +87,7 @@ export async function pushLeadToGhl(token: string | undefined, lead: Lead): Prom
   try {
     await ghlPost(token, "/opportunities/", {
       locationId: GHL.locationId,
-      pipelineId: GHL.pipelineId,
+      pipelineId: lead.pipelineId,
       pipelineStageId: lead.stageId,
       name: lead.opportunityName,
       status: "open",
