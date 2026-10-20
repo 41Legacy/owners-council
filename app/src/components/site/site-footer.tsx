@@ -10,9 +10,8 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="oc-footer__credit">
-          <p>Mike Laskowski</p>
-          <p>Strategic and Architectural Partner, 41 Legacy</p>
-          <p>90 Ingham Hill Road, Suite 3A, Old Saybrook, Connecticut 06475</p>
+          <p>Designed and facilitated by 41 Legacy</p>
+          <p>Chapters across New England and the tri-state area</p>
         </div>
       </div>
       <div className="oc-wrap oc-footer__legal">

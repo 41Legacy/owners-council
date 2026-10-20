@@ -20,18 +20,70 @@ const facts = [
   { label: "Who runs it", value: "Hosted by a trusted local advisor, designed and facilitated by 41 Legacy" },
 ];
 
-const tracks = [
+type StackItem = { name: string; outcome: string; img?: { src: string; alt: string } };
+
+const memberStack: { group: string; promise: string; items: StackItem[] }[] = [
   {
-    name: "Market education",
-    text: "What buyers, lenders and investors look for, what businesses like yours are worth, and how the market is moving in your industry.",
+    group: "Learn",
+    promise: "Clear thinking on the three questions every owner carries.",
+    items: [
+      {
+        name: "Market education",
+        outcome:
+          "Know what your business is worth and why: what buyers, lenders and investors look for, how they price companies like yours, and where your industry is heading.",
+      },
+      {
+        name: "Growth strategy",
+        outcome:
+          "Grow with less chaos. Pricing, cash, people and systems that make the business easier to run and less dependent on you.",
+      },
+      {
+        name: "Exit and succession planning",
+        outcome:
+          "Plan your next chapter on your own terms: every path from selling to passing it on, the right timing, and what makes a business transferable long before you need it to be.",
+      },
+    ],
   },
   {
-    name: "Growth strategy",
-    text: "Pricing, cash, people and systems: how to grow with less chaos and make the business easier to run.",
+    group: "Receive",
+    promise: "Tools built around your business, not a generic curriculum.",
+    items: [
+      {
+        name: "Private business reports",
+        outcome:
+          "A confidential, plain-language read on where your business stands today, what it is worth to the market, and what it is ready to take on next. Yours alone.",
+        img: { src: "/assets/img/report.webp", alt: "A bound private report with an orange tab on a walnut table" },
+      },
+      {
+        name: "CEO workshops",
+        outcome: "Hands-on working sessions on the decisions in front of you, shaped by what members ask for.",
+        img: { src: "/assets/img/workshop.webp", alt: "Owners working through printed worksheets at a large table" },
+      },
+      {
+        name: "Expert guest speakers",
+        outcome:
+          "Specialists on funding, lending, certifications, valuation and succession, there to teach and answer your questions.",
+        img: { src: "/assets/img/speaker.webp", alt: "A guest specialist speaking to a small group in a library room" },
+      },
+    ],
   },
   {
-    name: "Exit and succession planning",
-    text: "Your options, from selling to passing it on, the timing, and what makes a business transferable years before you need it to be.",
+    group: "Connect",
+    promise: "The right people, when you need them.",
+    items: [
+      {
+        name: "Access to trusted professionals",
+        outcome:
+          "CPAs, attorneys, bankers, valuation and M&A specialists, plus grant, funding and certification programs. Raise your hand and the council makes the introduction.",
+        img: { src: "/assets/img/advisors.webp", alt: "Three advisors planning over coffee by a cafe window" },
+      },
+      {
+        name: "A room of peers",
+        outcome:
+          "Owners who sit in the same seat, trading what works, cheering each other on, and building relationships that last well beyond the meeting.",
+        img: { src: "/assets/img/council.webp", alt: "Business owners in conversation around a long table" },
+      },
+    ],
   },
 ];
 
@@ -194,10 +246,10 @@ function Index() {
                   growth and your exit, and leave every session with something useful.
                 </p>
                 <ul>
-                  <li>Market education, strategy and exit planning</li>
+                  <li>Market education, growth strategy and exit planning</li>
                   <li>Private reports on your own business</li>
                   <li>CEO workshops and expert guest speakers</li>
-                  <li>Access to trusted professionals when you need them</li>
+                  <li>Introductions to trusted professionals when you ask</li>
                 </ul>
                 <div className="oc-path__actions">
                   <InviteCta />
@@ -232,81 +284,43 @@ function Index() {
         <section aria-labelledby="members-title" className="oc-section" id="members">
           <div className="oc-wrap">
             <h2 className="oc-h2" id="members-title">
-              What members gain.
+              Everything a seat at the table includes.
             </h2>
             <p className="oc-lede">
-              Three learning tracks run through every chapter, backed by reports, workshops, experts
-              and the people in the room.
+              One invitation, and all of this comes with it: the learning, the tools and the people
+              to help you build a business that runs well and is worth more.
             </p>
-            <ol className="oc-tracks">
-              {tracks.map((track, index) => (
-                <li key={track.name}>
-                  <span aria-hidden="true" className="oc-tracks__num">
-                    {index + 1}
-                  </span>
-                  <h3>{track.name}</h3>
-                  <p>{track.text}</p>
-                </li>
+            <div className="oc-stack">
+              {memberStack.map((block) => (
+                <div className="oc-stack__group" key={block.group}>
+                  <div className="oc-stack__head">
+                    <h3>{block.group}</h3>
+                    <p>{block.promise}</p>
+                  </div>
+                  <ul className="oc-stack__items">
+                    {block.items.map((item) => (
+                      <li className="oc-stack__item" data-has-img={item.img ? "true" : "false"} key={item.name}>
+                        {item.img ? (
+                          <img alt={item.img.alt} height={160} loading="lazy" src={item.img.src} width={220} />
+                        ) : null}
+                        <div className="oc-stack__text">
+                          <h4>{item.name}</h4>
+                          <p>{item.outcome}</p>
+                        </div>
+                        <span className="oc-stack__badge">Included</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ol>
-            <div className="oc-bento">
-              <article className="oc-bento__cell oc-bento__cell--report">
-                <img
-                  alt="A bound private report with an orange tab on a walnut table"
-                  height={1600}
-                  loading="lazy"
-                  src="/assets/img/report.webp"
-                  width={1280}
-                />
-                <div className="oc-bento__copy">
-                  <h3>Private reports on your business</h3>
-                  <p>
-                    After key sessions each owner receives a confidential, plain-language read on
-                    where the business stands today, what it is worth to the market, and how much
-                    growth and change it is ready for next. Yours alone.
-                  </p>
+              <div className="oc-stack__total">
+                <div>
+                  <p className="oc-stack__total-label">Your investment</p>
+                  <p className="oc-stack__total-value">A seat at the table. Nothing to buy, nothing to sign.</p>
+                  <p className="oc-stack__total-note">Membership is by invitation, 10 to 12 owners per chapter.</p>
                 </div>
-              </article>
-              <article className="oc-bento__cell oc-bento__cell--workshop">
-                <img
-                  alt="Owners working through printed worksheets at a large table"
-                  height={1024}
-                  loading="lazy"
-                  src="/assets/img/workshop.webp"
-                  width={1536}
-                />
-                <div className="oc-bento__copy">
-                  <h3>CEO workshops</h3>
-                  <p>Hands-on working sessions on the decisions members are facing right now.</p>
-                </div>
-              </article>
-              <article className="oc-bento__cell oc-bento__cell--speaker">
-                <img
-                  alt="A guest specialist speaking to a small group in a library room"
-                  height={1600}
-                  loading="lazy"
-                  src="/assets/img/speaker.webp"
-                  width={1280}
-                />
-                <div className="oc-bento__copy">
-                  <h3>Expert guest speakers</h3>
-                  <p>Funding, lending, certifications, valuation, succession and more, here to teach.</p>
-                </div>
-              </article>
-              <article className="oc-bento__cell oc-bento__cell--resources">
-                <h3>Access to trusted professionals</h3>
-                <p>
-                  CPAs, attorneys, bankers, valuation and M&amp;A specialists, plus grant and funding
-                  programs. Vetted by the council and introduced only when you ask.
-                </p>
-              </article>
-              <article className="oc-bento__cell oc-bento__cell--peers">
-                <h3>A room of peers</h3>
-                <p>
-                  Owners cheering each other on, trading what works, and building friendships that
-                  last well beyond the meeting. The most valuable thing in the room is the room.
-                </p>
-              </article>
+                <InviteCta />
+              </div>
             </div>
           </div>
         </section>
@@ -467,7 +481,7 @@ function Index() {
                 />
               </figure>
               <div>
-                <h3 className="oc-h3">Host a chapter with Mike.</h3>
+                <h3 className="oc-h3">Host a chapter with 41 Legacy.</h3>
                 <p className="oc-form-intro">
                   Tell us about your practice and the owners you serve. The first step is a
                   conversation, not a contract.

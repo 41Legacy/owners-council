@@ -222,7 +222,7 @@ export function ChapterForm() {
     return (
       <div className="oc-form__done" role="status">
         <h3>Thank you. Let's talk.</h3>
-        <p>Mike will reach out to set up a first conversation about your market and your clients.</p>
+        <p>The 41 Legacy team will reach out to set up a first conversation about your market and your clients.</p>
       </div>
     );
   }
