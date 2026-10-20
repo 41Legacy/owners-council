@@ -34,7 +34,7 @@ const closingActions = createElement(
 export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     actions: openingActions,
-    body: "Owners of established companies meet in small local chapters to learn growth strategy, market trends and exit planning, from experts and from each other.",
+    body: "Owners of established companies meet in local, invite-only chapters to learn growth strategy, market trends and exit planning, from experts and from each other.",
     clip: "/assets/world/scene-01.mp4",
     id: "the-seat",
     kicker: "The Owners Council",
@@ -47,15 +47,15 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   },
   {
     align: "right",
-    body: "Ten to twelve owners per chapter, meeting in person, hosted by a trusted local advisor. Nothing to buy, and nothing is sold in the room.",
+    body: "Each chapter seats a limited group of ten to twelve owners, meeting in person, hosted by a trusted local advisor. Nothing to buy, and nothing is sold in the room.",
     clip: "/assets/world/scene-02.mp4",
     id: "the-room",
     label: "The table",
     mobileClip: "/assets/world/scene-02-mobile.mp4",
     mobilePoster: "/assets/world/scene-02-mobile-poster.png",
     poster: "/assets/world/scene-02-poster.png",
-    tags: ["Invite only", "Nothing to buy"],
-    title: "Small rooms. Real conversations.",
+    tags: ["Limited seats", "Invite only"],
+    title: "Limited seats. Real conversations.",
   },
   {
     body: "Market education, strategy and exit planning, plus private reports on your business, CEO workshops and expert guest speakers.",

@@ -129,7 +129,7 @@ const hostSteps = [
 const faqs = [
   {
     q: "What exactly is The Owners Council?",
-    a: "A small, invite-only group of business owners in your area who meet in person to learn from experts and from each other: market education, growth strategy and exit planning, with private reports on your own business.",
+    a: "A limited-seat, invite-only group of business owners in your area who meet in person to learn from experts and from each other: market education, growth strategy and exit planning, with private reports on your own business.",
   },
   {
     q: "Does it cost anything?",
