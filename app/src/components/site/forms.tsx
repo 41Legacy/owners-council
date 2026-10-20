@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
+import { CHAPTER_GROUPS, OTHER_AREA } from "@/lib/chapters";
 import { CONSENT_CALLS_TEXTS, CONSENT_EMAIL } from "@/lib/consent";
 
 import { PREFILL_EVENT, type PrefillDetail, type PrefillTarget } from "./prefill";
@@ -8,17 +9,7 @@ import { submitChapterInquiry, submitInvitation } from "@/lib/api/council.functi
 
 type Status = "idle" | "sending" | "sent" | "error";
 
-export const REGIONS = [
-  "Connecticut",
-  "Greater Boston",
-  "New York City and Westchester",
-  "Long Island",
-  "Northern New Jersey",
-  "Rhode Island",
-  "Central and Western Massachusetts",
-  "New Hampshire, Vermont and Maine",
-  "Somewhere else",
-];
+
 
 const REVENUE = ["Under $1M", "$1M to $3M", "$3M to $10M", "$10M to $25M", "Over $25M"];
 
@@ -91,7 +82,7 @@ function Select({
     const onPrefill = (event: Event) => {
       const detail = (event as CustomEvent<PrefillDetail>).detail;
       if (detail?.target !== prefillTarget || !ref.current) return;
-      const match = options.find((o) => o === detail.region) ?? options.find((o) => detail.region.startsWith(o.split(",")[0] ?? o));
+      const match = options.find((o) => o === detail.region);
       if (match) ref.current.value = match;
     };
     window.addEventListener(PREFILL_EVENT, onPrefill);
@@ -109,6 +100,42 @@ function Select({
             {option}
           </option>
         ))}
+      </select>
+    </div>
+  );
+}
+
+function ChapterSelect({ id, label, prefillTarget }: { id: string; label: string; prefillTarget: PrefillTarget }) {
+  const ref = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    const onPrefill = (event: Event) => {
+      const detail = (event as CustomEvent<PrefillDetail>).detail;
+      if (detail?.target !== prefillTarget || !ref.current) return;
+      ref.current.value = detail.region;
+    };
+    window.addEventListener(PREFILL_EVENT, onPrefill);
+    return () => window.removeEventListener(PREFILL_EVENT, onPrefill);
+  }, [prefillTarget]);
+  return (
+    <div className="oc-field">
+      <label htmlFor={id}>{label}</label>
+      <select defaultValue="" id={id} name={id} ref={ref} required>
+        <option disabled value="">
+          Choose a chapter
+        </option>
+        {CHAPTER_GROUPS.map((group) => (
+          <optgroup key={group.state} label={group.state}>
+            {group.chapters.map((chapter) => (
+              <option key={chapter.name} value={chapter.name}>
+                {chapter.name}
+                {chapter.status === "open" ? " (open for a host)" : ""}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+        <optgroup label="Other">
+          <option value={OTHER_AREA}>{OTHER_AREA}</option>
+        </optgroup>
       </select>
     </div>
   );
@@ -208,7 +235,7 @@ export function InvitationForm() {
         <Field autoComplete="organization" id="company" label="Company" required />
         <Field autoComplete="email" id="email" label="Email" required type="email" />
         <Field autoComplete="tel" id="phone" label="Phone" type="tel" />
-        <Select id="region" label="Chapter you would like to join" options={REGIONS} prefillTarget="owner" />
+        <ChapterSelect id="region" label="Chapter you would like to join" prefillTarget="owner" />
         <Select id="revenue" label="Annual revenue" options={REVENUE} />
         <Field id="referredBy" label="Who referred you" />
         <Area
@@ -283,7 +310,7 @@ export function ChapterForm() {
         <Select id="role" label="Your practice" options={ROLES} />
         <Field autoComplete="email" id="cemail" label="Email" required type="email" />
         <Field autoComplete="tel" id="cphone" label="Phone" type="tel" />
-        <Select id="cregion" label="Where would your chapter meet" options={REGIONS} prefillTarget="advisor" />
+        <ChapterSelect id="cregion" label="Chapter you would like to host" prefillTarget="advisor" />
         <Area
           hint="Who do you serve, and roughly how many owners would you be glad to introduce?"
           id="clients"

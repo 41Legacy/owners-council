@@ -71,7 +71,7 @@ export const scrollScrubScenes: ScrollScrubScene[] = [
   {
     actions: closingActions,
     align: "right",
-    body: "Active in Connecticut and Greater Boston, with new chapters forming across New England and the tri-state area.",
+    body: "Active in Middlesex County, Connecticut and Greater Boston, with chapters open for hosts across New England and the tri-state area.",
     clip: "/assets/world/scene-04.mp4",
     id: "the-chapters",
     label: "The chapters",

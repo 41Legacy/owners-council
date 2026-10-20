@@ -5,6 +5,7 @@ import { CopyIntro } from "@/components/site/copy-intro";
 import { ChapterInlineCta, InviteCta } from "@/components/site/ctas";
 import { ChapterForm, InvitationForm } from "@/components/site/forms";
 import { prefillAndScroll } from "@/components/site/prefill";
+import { ALL_CHAPTERS, CHAPTER_GROUPS } from "@/lib/chapters";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { scrollScrubScenes, scrollScrubTheme } from "@/scroll-scrub-scenes";
@@ -94,36 +95,7 @@ const ownerSteps = [
   { title: "Learn and grow", text: "Sessions, workshops, expert guests and your private reports, all year." },
 ];
 
-const chapters = [
-  {
-    name: "Connecticut",
-    state: "active" as const,
-    status: "Founding chapter",
-    detail: "Owner-operators across Connecticut, meeting in person.",
-  },
-  {
-    name: "Greater Boston",
-    state: "active" as const,
-    status: "Active",
-    detail:
-      "Serving the Asian business-owner community of greater Boston. Designed and facilitated by 41 Legacy, hosted in partnership with PNC Private Bank.",
-  },
-  { name: "New York City and Westchester", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
-  { name: "Northern New Jersey", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
-  { name: "Rhode Island", state: "forming" as const, status: "Forming", detail: "Seeking a founding advisor host." },
-  {
-    name: "Central and Western Massachusetts",
-    state: "forming" as const,
-    status: "Forming",
-    detail: "Seeking a founding advisor host.",
-  },
-  {
-    name: "New Hampshire, Vermont and Maine",
-    state: "forming" as const,
-    status: "Forming",
-    detail: "Seeking a founding advisor host.",
-  },
-];
+
 
 const hostBenefits = [
   "Give your best clients something valuable that no competitor offers",
@@ -366,8 +338,9 @@ function Index() {
                 Find your chapter.
               </h2>
               <p className="oc-lede">
-                Join an active chapter, get on the list for one that is forming, or host one for your
-                clients. Every chapter runs on the same design and the same ground rules.
+                Open a state to see what is active and what is available. Join an active chapter, join
+                the waitlist for one that is open, or host one for your clients. Every chapter runs on
+                the same design and the same ground rules.
               </p>
               <figure className="oc-chapters__figure">
                 <img
@@ -379,37 +352,85 @@ function Index() {
                 />
               </figure>
             </div>
-            <ul className="oc-chapter-list">
-              {chapters.map((chapter) => (
-                <li className="oc-chapter" data-state={chapter.state} key={chapter.name}>
-                  <div className="oc-chapter__body">
-                    <div className="oc-chapter__top">
-                      <h3>{chapter.name}</h3>
-                      <span className="oc-chapter__status">{chapter.status}</span>
-                    </div>
-                    <p>{chapter.detail}</p>
-                    <div className="oc-chapter__actions">
+            <div className="oc-chapter-groups">
+              <div className="oc-active-now">
+                <p className="oc-active-now__label">Active now</p>
+                <ul>
+                  {ALL_CHAPTERS.filter((c) => c.status !== "open").map((chapter) => (
+                    <li key={chapter.name}>
+                      <div>
+                        <h3>{chapter.name}</h3>
+                        <p>{chapter.status === "founding" ? "Founding chapter. " : ""}{chapter.area}</p>
+                      </div>
                       <button
                         className="cta-join"
                         onClick={() => prefillAndScroll("owner", chapter.name)}
                         type="button"
                       >
-                        {chapter.state === "active" ? "Join this chapter" : "Join the waitlist"}
+                        Join this chapter
                       </button>
-                      {chapter.state === "forming" ? (
-                        <button
-                          className="cta-host"
-                          onClick={() => prefillAndScroll("advisor", chapter.name)}
-                          type="button"
-                        >
-                          Host this chapter
-                        </button>
-                      ) : null}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <p className="oc-chapter-groups__label">Browse by state</p>
+              {CHAPTER_GROUPS.map((group) => {
+                const live = group.chapters.filter((c) => c.status !== "open").length;
+                const open = group.chapters.length - live;
+                return (
+                  <details className="oc-cgroup" key={group.state}>
+                    <summary>
+                      <span className="oc-cgroup__state">{group.state}</span>
+                      <span className="oc-cgroup__counts">
+                        {live > 0 ? <span className="oc-cgroup__live">{live} active</span> : null}
+                        <span>{open} open for a host</span>
+                      </span>
+                    </summary>
+                    <ul className="oc-chapter-list">
+                      {group.chapters.map((chapter) => {
+                        const isLive = chapter.status !== "open";
+                        return (
+                          <li className="oc-chapter" data-state={isLive ? "active" : "forming"} key={chapter.name}>
+                            <div className="oc-chapter__body">
+                              <div className="oc-chapter__top">
+                                <h3>{chapter.name}</h3>
+                                <span className="oc-chapter__status">
+                                  {chapter.status === "founding"
+                                    ? "Founding chapter"
+                                    : chapter.status === "active"
+                                      ? "Active"
+                                      : "Open for a host"}
+                                </span>
+                              </div>
+                              <p>{chapter.area}</p>
+                              {chapter.note ? <p className="oc-chapter__note">{chapter.note}</p> : null}
+                              <div className="oc-chapter__actions">
+                                <button
+                                  className="cta-join"
+                                  onClick={() => prefillAndScroll("owner", chapter.name)}
+                                  type="button"
+                                >
+                                  {isLive ? "Join this chapter" : "Join the waitlist"}
+                                </button>
+                                {!isLive ? (
+                                  <button
+                                    className="cta-host"
+                                    onClick={() => prefillAndScroll("advisor", chapter.name)}
+                                    type="button"
+                                  >
+                                    Host this chapter
+                                  </button>
+                                ) : null}
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </details>
+                );
+              })}
+            </div>
           </div>
         </section>
 

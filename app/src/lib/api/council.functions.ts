@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { bindings } from "../bindings.server";
 import { CONSENT_CALLS_TEXTS, CONSENT_EMAIL, CONSENT_VERSION, SUBMIT_NOTICE } from "../consent";
+import { isActiveChapter } from "../chapters";
 import { GHL, pushLeadToGhl } from "../ghl.server";
 
 type ConsentRecord = {
@@ -134,13 +135,13 @@ export const submitInvitation = createServerFn({ method: "POST" })
       tags: [
         "owners council",
         "oc: business owner",
-        GHL.activeChapters.includes(data.region) ? "oc: invitation request" : "oc: waitlist",
+        isActiveChapter(data.region) ? "oc: invitation request" : "oc: waitlist",
         `oc chapter: ${data.region}`,
         `oc revenue: ${data.revenue}`,
         ...consentTags(consent),
       ],
       pipelineId: GHL.owners.pipelineId,
-      stageId: GHL.activeChapters.includes(data.region) ? GHL.owners.stageRequested : GHL.owners.stageWaitlist,
+      stageId: isActiveChapter(data.region) ? GHL.owners.stageRequested : GHL.owners.stageWaitlist,
       opportunityName: `${data.company} (${data.region})`,
       note: [
         "Owners Council invitation request (theownerscouncil.com)",

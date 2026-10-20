@@ -14,7 +14,6 @@ export const GHL = {
     pipelineId: "CtCglew3cIVqQhPlUA1Q", // Owners Council: Chapter Hosts (Advisors)
     stageInquiry: "f4e1b9f3-1f7e-4d87-90c9-a2bc27769d1a", // Host inquiry
   },
-  activeChapters: ["Connecticut", "Greater Boston"],
 };
 
 type Lead = {
