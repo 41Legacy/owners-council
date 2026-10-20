@@ -53,9 +53,9 @@ function normalizePhone(raw: string): string | undefined {
   return raw.trim().startsWith("+") ? `+${digits}` : undefined;
 }
 
-/** Create or update the contact, add a note and an opportunity. Returns true when the contact landed. */
-export async function pushLeadToGhl(token: string | undefined, lead: Lead): Promise<boolean> {
-  if (!token) return false;
+/** Create or update the contact, add a note and an opportunity. Returns the contact id when the contact landed. */
+export async function pushLeadToGhl(token: string | undefined, lead: Lead): Promise<string | undefined> {
+  if (!token) return undefined;
   const parts = lead.name.trim().split(/\s+/);
   const firstName = parts[0] ?? lead.name;
   const lastName = parts.slice(1).join(" ");
@@ -75,9 +75,9 @@ export async function pushLeadToGhl(token: string | undefined, lead: Lead): Prom
     contactId = (upsert.contact as { id?: string } | undefined)?.id;
   } catch (error) {
     console.error(error);
-    return false;
+    return undefined;
   }
-  if (!contactId) return false;
+  if (!contactId) return undefined;
   try {
     await ghlPost(token, `/contacts/${contactId}/notes`, { body: lead.note });
   } catch (error) {
@@ -97,5 +97,74 @@ export async function pushLeadToGhl(token: string | undefined, lead: Lead): Prom
     // An open opportunity for this contact may already exist; the contact and note still landed.
     console.error(error);
   }
-  return true;
+  return contactId;
+}
+
+// ---------------------------------------------------------------------------
+// New-submission alert emailed to the 41 Legacy team.
+// Sent through GHL Conversations to the team contact below, so it needs the
+// conversations/message.write scope on the Private Integration token.
+// ---------------------------------------------------------------------------
+export const NOTIFY = {
+  contactId: "8c6uL2e3P5l5Vq2Mg3CV", // Mike Laskowski contact in the 41 Legacy sub-account
+  email: "mike@41legacy.com",
+};
+
+export type Alert = {
+  kind: "owner" | "host";
+  headline: string; // e.g. "Waitlist: Fairfield County, CT"
+  rows: [string, string][];
+  leadContactId?: string;
+};
+
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+export async function notifyTeam(token: string | undefined, alert: Alert): Promise<boolean> {
+  if (!token) return false;
+  const label = alert.kind === "owner" ? "BUSINESS OWNER" : "CHAPTER HOST (ADVISOR)";
+  const color = alert.kind === "owner" ? "#1f3a5f" : "#8a5a14";
+  const subject = `[Owners Council] New ${alert.kind === "owner" ? "Business Owner request" : "Chapter Host inquiry"}: ${alert.headline}`;
+  const link = alert.leadContactId
+    ? `https://app.gohighlevel.com/v2/location/${GHL.locationId}/contacts/detail/${alert.leadContactId}`
+    : "";
+  const rows = alert.rows
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:6px 12px 6px 0;color:#666;font-family:Arial,sans-serif;font-size:13px;vertical-align:top;white-space:nowrap">${esc(k)}</td><td style="padding:6px 0;font-family:Georgia,serif;font-size:15px;color:#111">${esc(v || "not given")}</td></tr>`,
+    )
+    .join("");
+  const html = `<div style="max-width:560px">
+<div style="display:inline-block;background:${color};color:#fff;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;letter-spacing:1px;padding:6px 10px;border-radius:3px">${label}</div>
+<h2 style="font-family:Arial,sans-serif;font-size:20px;margin:14px 0 4px">${esc(alert.headline)}</h2>
+<p style="font-family:Georgia,serif;font-size:14px;color:#444;margin:0 0 14px">A new ${alert.kind === "owner" ? "business owner request" : "chapter host inquiry"} came in on theownerscouncil.com.</p>
+<table style="border-collapse:collapse">${rows}</table>
+${link ? `<p style="margin:18px 0 0"><a href="${link}" style="font-family:Arial,sans-serif;font-size:14px;color:${color}">Open the contact in Go High Level</a></p>` : ""}
+</div>`;
+  try {
+    const res = await fetch(`${GHL_API}/conversations/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Version: "2021-04-15",
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        type: "Email",
+        contactId: NOTIFY.contactId,
+        emailTo: NOTIFY.email,
+        subject,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      console.error(`GHL notify ${res.status}: ${(await res.text()).slice(0, 300)}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 }

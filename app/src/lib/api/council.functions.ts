@@ -5,7 +5,7 @@ import { z } from "zod";
 import { bindings } from "../bindings.server";
 import { CONSENT_CALLS_TEXTS, CONSENT_EMAIL, CONSENT_VERSION, SUBMIT_NOTICE } from "../consent";
 import { isActiveChapter } from "../chapters";
-import { GHL, pushLeadToGhl } from "../ghl.server";
+import { GHL, notifyTeam, pushLeadToGhl } from "../ghl.server";
 
 type ConsentRecord = {
   sms: boolean;
@@ -152,6 +152,25 @@ export const submitInvitation = createServerFn({ method: "POST" })
         `On their mind: ${data.note || "not given"}`,
       ].join("\n") + consentNote(consent),
     });
+    const active = isActiveChapter(data.region);
+    await notifyTeam(GHL_PRIVATE_TOKEN, {
+      kind: "owner",
+      headline: `${active ? "Invitation request" : "Waitlist"}: ${data.region}`,
+      leadContactId: inGhl,
+      rows: [
+        ["Type", active ? "Business owner, invitation request (active chapter)" : "Business owner, waitlist (chapter not yet active)"],
+        ["Name", data.name],
+        ["Company", data.company],
+        ["Email", data.email],
+        ["Phone", data.phone],
+        ["Chapter", data.region],
+        ["Annual revenue", data.revenue],
+        ["Referred by", data.referredBy],
+        ["On their mind", data.note],
+        ["Calls and texts", consent.sms ? "Yes" : "No"],
+        ["Email updates", consent.email ? "Yes" : "No"],
+      ],
+    });
     if (!stored && !forwarded && !inGhl) throw new Error("Submissions are not configured yet");
     return { ok: true };
   });
@@ -209,6 +228,23 @@ export const submitChapterInquiry = createServerFn({ method: "POST" })
         `Proposed chapter area: ${data.region}`,
         `Client base: ${data.clients || "not given"}`,
       ].join("\n") + consentNote(consent),
+    });
+    await notifyTeam(GHL_PRIVATE_TOKEN, {
+      kind: "host",
+      headline: `${data.role}, ${data.region}`,
+      leadContactId: inGhl,
+      rows: [
+        ["Type", "Advisor, wants to host a chapter"],
+        ["Name", data.name],
+        ["Firm", data.firm],
+        ["Practice", data.role],
+        ["Email", data.email],
+        ["Phone", data.phone],
+        ["Proposed chapter", data.region],
+        ["Client base", data.clients],
+        ["Calls and texts", consent.sms ? "Yes" : "No"],
+        ["Email updates", consent.email ? "Yes" : "No"],
+      ],
     });
     if (!stored && !forwarded && !inGhl) throw new Error("Submissions are not configured yet");
     return { ok: true };
